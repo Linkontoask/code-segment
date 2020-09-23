@@ -2,9 +2,21 @@ function isSub(target) {
   return !!target['_ons']
 }
 
-function Sub() {
+interface SubHeard {
+  _ons: any
+  $on: (Playground: string | symbol, handle: (e: any) => void) => void
+  $off: (Playground: string | symbol, handle: (e: any) => void) => void
+  [key: string]: any
+}
+
+interface WatchHeard {
+  $emit?: (Playground: string | symbol, handleData: any) => void
+  [key: string]: any
+}
+
+function Sub(): SubHeard {
   const ons = {}
-  const heardless = {
+  const heardless: SubHeard = {
     _ons: ons,
     $on: (Playground, handle) => {
       if (ons[Playground]) {
@@ -22,12 +34,14 @@ function Sub() {
     }
   }
   Object.defineProperty(heardless, '_ons', {
-    writable: false
+    writable: false,
+    configurable: false,
+    enumerable: false
   })
   return heardless
 }
 
-function Watch(sub) {
+function Watch(sub: SubHeard): WatchHeard | void {
   if (!sub) return console.error('Sub is a required parameter')
   if (!isSub(sub)) return console.error('Sub must be the return value of the Sub function')
   const onList = sub['_ons']
@@ -41,7 +55,7 @@ function Watch(sub) {
   }
 }
 
-const sub = Sub()
+const sub: SubHeard = Sub()
 
 const watch = Watch(sub)
 
@@ -53,11 +67,13 @@ const click = Symbol('click')
 
 sub.$on(click, clickHandle)
 
-watch.$emit(click, {
-  type: 'click1',
-  timestrap: Date.now(),
-  context: 'context data'
-})
+if (watch) {
+  watch.$emit(click, {
+    type: 'click1',
+    timestrap: Date.now(),
+    context: 'context data'
+  })
+}
 
 sub.$off(click, clickHandle)
 
@@ -67,8 +83,11 @@ sub.$on(hover, e => {
   console.log('click2: ', e)
 })
 
-watch.$emit(hover, {
-  type: 'click2',
-  timestrap: Date.now(),
-  context: 'context props'
-})
+if (watch) {
+  watch.$emit(hover, {
+    type: 'click2',
+    timestrap: Date.now(),
+    context: 'context props'
+  })
+}
+

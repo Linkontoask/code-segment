@@ -8,10 +8,11 @@
       "type": "node",
       "request": "launch",
       "name": "Debug JavaScript",
+      "runtimeArgs": ["--nolazy", "-r", "ts-node/register/transpile-only"],
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "program": "${file}"
+      "args": ["${file}"]
     }
   ]
 }
